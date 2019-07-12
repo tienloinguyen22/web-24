@@ -61,6 +61,8 @@ window.onload = () => {
             .then((data) => {
               if (data.success) {
                 // redirect to question detail
+                
+                window.location.href = `/question/${data.id}`;
               } else {
                 window.alert(data.message);
               }
