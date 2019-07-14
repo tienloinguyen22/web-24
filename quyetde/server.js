@@ -32,6 +32,10 @@ mongoose.connect(
         res.sendFile(path.resolve(__dirname, './public/html/ask.html'));
       });
 
+      app.get('/search', (req, res) => {
+        res.sendFile(path.resolve(__dirname, './public/html/search.html'));
+      });
+
       app.post('/create-question', (req, res) => {
         // save newQuestion
         questionModel.create({
@@ -49,111 +53,98 @@ mongoose.connect(
             });
           }
         });
-
-        // fs.readFile('./data.json', (error, data) => {
-        //   if (error) {
-        //     res.status(500).json({
-        //       success: false,
-        //       message: error.message,
-        //     });
-        //   } else {
-        //     const questionList = JSON.parse(data);
-        //     const newQuestionId = new Date().getTime();
-        //     const newQuestion = {
-        //       id: newQuestionId,
-        //       questionContent: req.body.questionContent,
-        //       like: 0,
-        //       dislike: 0,
-        //       createdAt: new Date().toString(),
-        //     };
-        //     questionList.push(newQuestion);
-
-        //     fs.writeFile('./data.json', JSON.stringify(questionList), (error) => {
-        //       if (error) {
-        //         res.status(500).json({
-        //           success: false,
-        //           message: error.message,
-        //         });
-        //       } else {
-        //         res.status(201).json({
-        //           success: true,
-        //           id: newQuestionId,
-        //         });
-        //       }
-        //     });
-        //   }
-        // });
       });
 
       app.get('/get-question-by-id/:questionId', (req, res) => {
-        fs.readFile('./data.json', {encoding: 'utf8'}, (error, data) => {
+        questionModel.findById(req.params.questionId, (error, data) => {
           if (error) {
             res.status(500).json({
               success: false,
               message: error.message,
             });
           } else {
-            const listQuestions = JSON.parse(data);
-            let selectedQuestion;
-            for (let i = 0; i < listQuestions.length; i += 1) {
-              if (String(listQuestions[i].id) === req.params.questionId) {
-                selectedQuestion = listQuestions[i];
-                break;
-              }
-            }
-
             res.status(200).json({
               success: true,
-              data: selectedQuestion,
+              data: {
+                ...data._doc,
+                id: data._id,
+              },
             });
           }
         });
       });
 
       app.get('/get-random-question', (req, res) => {
-        fs.readFile('./data.json', {encoding: 'utf8'}, (error, data) => {
+        questionModel.aggregate([
+          {$sample: {size: 1}},
+        ]).exec((error, data) => {
           if (error) {
             res.status(500).json({
               success: false,
-              message: error.message
+              message: error.message,
             });
           } else {
-            const listQuestions = JSON.parse(data);
-            const randomQuestion = listQuestions[Math.floor(Math.random() * listQuestions.length)];
             res.status(200).json({
               success: true,
-              data: randomQuestion,
+              data: {
+                ...data[0],
+                id: data[0]._id,
+              },
             });
           }
         });
       });
 
       app.put('/vote', (req, res) => {
-        fs.readFile('./data.json', {encoding: 'utf8'}, (error, data) => {
+        // check if record exist
+        questionModel.findById(req.body.id, (error, data) => {
           if (error) {
             res.status(500).json({
               success: false,
-              message: error.message,
-            })
+              message: error.messsage,
+            });
+          } else if (!data) {
+            res.status(404).json({
+              success: false,
+              message: `Question not found`,
+            });
           } else {
-            const listQuestions = JSON.parse(data);
-            for (let i = 0; i < listQuestions.length; i += 1) {
-              if (listQuestions[i].id === req.body.id) {
-                listQuestions[i][req.body.vote] += 1;
-              }
-            }
+            questionModel.findByIdAndUpdate(
+              req.body.id,
+              {$inc: {[req.body.vote]: 1}},
+              (err) => {
+                if (err) {
+                  res.status(500).json({
+                    success: false,
+                    message: err.messsage,
+                  });
+                } else {
+                  res.status(201).json({
+                    success: true,
+                  });
+                }
+              });
+          }
+        });
+      });
 
-            fs.writeFile('./data.json', JSON.stringify(listQuestions), (err) => {
-              if (err) {
-                res.status(500).json({
-                  success: false,
-                  message: err.message,
-                });
-              } else {
-                res.status(201).json({
-                  success: true,
-                });
-              }
+      app.get('/search-quetions', (req, res) => {
+        const keyword = req.query.keyword;
+
+        questionModel.find({
+          // ignore-case
+          questionContent: {$regex: keyword, $options: 'i'},
+        }, (error, data) => {
+          if (error) {
+            res.status(500).json({
+              success: false,
+              messsage: error.message,
+            });
+          } else {
+            res.status(200).json({
+              success: true,
+              data: data,
+              total: data.length,
             });
           }
         });
