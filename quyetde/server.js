@@ -17,24 +17,29 @@ mongoose.connect(
       const app = express();
 
       // routers
+      app.use((req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+      });
       app.use(express.static('public'));
       app.use(bodyParser.json());
 
-      app.get('/', (req, res) => {
-        res.sendFile(path.resolve(__dirname, './public/html/index.html'));
-      });
+      // app.get('/', (req, res) => {
+      //   res.sendFile(path.resolve(__dirname, './public/html/index.html'));
+      // });
 
-      app.get('/question/:questionId', (req, res) => {
-        res.sendFile(path.resolve(__dirname, './public/html/question.html'));
-      });
+      // app.get('/question/:questionId', (req, res) => {
+      //   res.sendFile(path.resolve(__dirname, './public/html/question.html'));
+      // });
 
-      app.get('/ask', (req, res) => {
-        res.sendFile(path.resolve(__dirname, './public/html/ask.html'));
-      });
+      // app.get('/ask', (req, res) => {
+      //   res.sendFile(path.resolve(__dirname, './public/html/ask.html'));
+      // });
 
-      app.get('/search', (req, res) => {
-        res.sendFile(path.resolve(__dirname, './public/html/search.html'));
-      });
+      // app.get('/search', (req, res) => {
+      //   res.sendFile(path.resolve(__dirname, './public/html/search.html'));
+      // });
 
       app.post('/create-question', (req, res) => {
         // save newQuestion
@@ -150,7 +155,7 @@ mongoose.connect(
         });
       });
 
-      app.listen(3000);
+      app.listen(3001);
     }
   },
 );
