@@ -108,6 +108,10 @@ userRouter.post('/login', (req, res) => {
       res.status(200).json({
         success: true,
         message: 'Login success',
+        data: {
+          email: data.email,
+          fullName: data.fullName,
+        },
       });
     }
   });
