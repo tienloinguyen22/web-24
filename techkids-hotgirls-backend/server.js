@@ -5,6 +5,7 @@ const userRouter = require('./users/users.router');
 const session = require('express-session');
 const cors = require('cors');
 const postRouter = require('./posts/posts.router');
+const uploadRouter = require('./uploads/uploads.router');
 
 mongoose.connect('mongodb://localhost:27017/techkids-hotgirls', (error) => {
   if (error) {
@@ -22,11 +23,13 @@ mongoose.connect('mongodb://localhost:27017/techkids-hotgirls', (error) => {
     app.use(session({
       secret: 'keyboard cat',
     }));
+    app.use(express.static('public'))
 
     // routers
     // /users/test
     app.use('/users', userRouter);
     app.use('/posts', postRouter);
+    app.use('/uploads', uploadRouter);
 
     // start server
     app.listen(3001, (err) => {

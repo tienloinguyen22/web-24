@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter, Route } from 'react-router-dom';
 import LoginScreen from './pages/LoginScreen';
 import HomeScreen from './pages/HomeScreen';
+import CreatePostScreen from './pages/CreatePostScreen';
 
 class App extends React.Component {
   state = {
@@ -83,6 +84,7 @@ class App extends React.Component {
             <form className="form-inline my-2 my-lg-0">
               <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
               <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+              <a className='btn btn-outline-primary ml-3' href='/create-post'>+ New Post</a>
             </form>
           </div>
         </nav>
@@ -90,6 +92,7 @@ class App extends React.Component {
         <BrowserRouter>
           <Route path='/' exact={true} component={HomeScreen} />
           <Route path='/login' component={LoginScreen} />
+          <Route path='/create-post' component={CreatePostScreen} />
         </BrowserRouter>
       </div>
     );
